@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+
+<h1>Add a new drink to the menu</h1>
+
+<form method = "POST" action="{% url 'addDrink' %}">
+    {% csrf_token %}
+    Drink Name:
+    <br/>
+    <input type="text" name="name" />
+    <br/>
+    Drink Price:
+    <br/>
+    <input type="number" step="any" name="price" />
+    <br/>
+    <input class ="btn btn-primary" type="submit" value= "Add" />
+    <br/>
+</form>
+
+
+{% endblock %}
