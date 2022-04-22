@@ -13,13 +13,6 @@ CoffeeManager for CS348
 6. If the above command gives you errors make sure you have installed all the required python packages 
 7. To run the project `python manage.py runserver`
 
-## Project Structure
-1. coffee directory is the djangoproject directory
-2. coffeemanager is the djangoapp directory, all the main code is inside this
-3. coffeemanager/templates iinclude all the html files
-4. coffeemanager/models.py include the schema, more schemas to be added as we progress
-5. coffeemanager/views.py contain all the code for rendering each view
-6. coffeemanager/urls.py has the index of all urls currently served by the project
 
 ## Project Structure
 1. coffee directory is the djangoproject directory
