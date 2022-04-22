@@ -78,9 +78,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'coffeemanager',
         'USER': 'root',
-        'PASSWORD': 'Psych@2001',
+        'PASSWORD': 'coffee',
         'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'PORT': '1234',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
