@@ -15,8 +15,13 @@ def staffHome(request):
 
 def orders(request):
     cnx = mysql.connector.connect(user='root', password="coffee",
-                                  host='127.0.0.1:1234',
+                                  host='127.0.0.1', port=1234,
                                   database='coffeemanager')
+    cursor = cnx.cursor()
+    query = "SELECT name, price price from coffeemanager_drink;"
+    cursor.execute(query)
+    for (name, price) in cursor:
+        print(name, price)
     return render(request, "coffeemanager/home.html")
 
 
