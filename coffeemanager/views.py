@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .models import Customer, Drink
 from django.contrib import auth
-
+import mysql.connector
 # Create your views here.
 
 
@@ -12,6 +12,12 @@ def home(request):
 
 def staffHome(request):
     return render(request, "coffeemanager/staffHome.html")
+
+def orders(request):
+    cnx = mysql.connector.connect(user='root', password="coffee",
+                                  host='127.0.0.1:1234',
+                                  database='coffeemanager')
+    return render(request, "coffeemanager/home.html")
 
 
 def addDrink(request):
