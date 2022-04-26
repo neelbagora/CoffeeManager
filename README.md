@@ -8,7 +8,7 @@ CoffeeManager for CS348
 2. Download the Cloud SQL Auth Proxy: https://cloud.google.com/sql/docs/mysql/connect-admin-proxy
 3. KEY_FILE is the file I sent on groupme
 4. Run this command:
-`./cloud_sql_proxy -credential_file="[PATH_TO_KEY_FILE]" -instances=cs348-coffeemanager:us-central1:coffeetables=tcp:1234`
+`./cloud_sql_proxy -credential_file="[PATH_TO_KEY_FILE]" -instances=cs348-coffeemanager:us-central1:coffee=tcp:1234`
 5. Run `python manage.py migrate`
 6. If the above command gives you errors make sure you have installed all the required python packages 
 7. To run the project `python manage.py runserver`
