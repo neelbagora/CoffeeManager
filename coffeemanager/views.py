@@ -5,6 +5,13 @@ from django.contrib import auth
 import mysql.connector
 # Create your views here.
 
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+            dict(zip([col[0] for col in desc], row))
+            for row in cursor.fetchall()
+    ]
 
 def home(request):
     return render(request, "coffeemanager/home.html")
@@ -18,11 +25,12 @@ def orders(request):
                                   host='127.0.0.1', port=1234,
                                   database='coffeemanager')
     cursor = cnx.cursor()
-    query = "SELECT name, price price from coffeemanager_drink;"
+    query = "SELECT name, price from coffeemanager_drink;"
     cursor.execute(query)
-    for (name, price) in cursor:
-        print(name, price)
-    return render(request, "coffeemanager/home.html")
+    drinks = dictfetchall(cursor)
+    for drink in cursor:
+        print(drink)
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': drinks})
 
 
 def addDrink(request):

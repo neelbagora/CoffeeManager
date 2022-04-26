@@ -10,20 +10,14 @@
 <br/>
 {% endif %}
 
-<h1>Add a new drink to the menu</h1>
+<h1>MENU</h1>
 
-<form method = "POST" action="{% url 'addDrink' %}">
-    {% csrf_token %}
-    Drink Name:
-    <br/>
-    <input type="text" name="name" />
-    <br/>
-    Drink Price:
-    <br/>
-    <input type="number" step="any" name="price" />
-    <br/>
-    <input class ="btn btn-primary" type="submit" value= "Add" />
-    <br/>
+{% for drink in drinks %}
+    <ul>
+        <li style="display:inline">{{ drink.name }}</li>
+        <li style="display:inline">{{ drink.price}}</li>
+    </ul>
+{% endfor %}
 </form>
 
 
