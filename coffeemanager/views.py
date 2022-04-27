@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from .models import Customer, Drink
 from django.contrib import auth
 import mysql.connector
+import logging
 
 # # Global connection to be used by all views for prepared statement queries
 cnx = mysql.connector.connect(user='root', password="coffee",
@@ -129,3 +130,12 @@ def login(request):
 def logout(request):
     auth.logout(request)
     return redirect('home')
+
+def status(request):
+    customer_id = request.user.username
+    query = f'''SELECT order_id, order_status from coffeemanager_orders where customer_id="{customer_id}";
+    '''
+    cursor = preparedStatements(query)
+    status = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/menu/status.html", context={'status': status})

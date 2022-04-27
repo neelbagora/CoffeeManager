@@ -10,5 +10,6 @@ urlpatterns = [
     path('staffHome', views.staffHome, name="staffHome"),
     path('addDrink', views.addDrink, name="addDrink"),
     path('menu', views.menu, name="menu"),
-    path('order', views.order, name="order")
+    path('order', views.order, name="order"),
+    path('status', views.status, name="status")
 ]
