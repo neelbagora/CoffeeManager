@@ -15,7 +15,21 @@
 {% for drink in drinks %}
     <ul>
         <li style="display:inline">{{ drink.name }}</li>
-        <li style="display:inline">{{ drink.price}}</li>
+        <li style="display:inline">${{ drink.price}}</li>
+        <li style="display:inline">
+            <form name="order_drink" method="post" action="{% url 'order'%}">
+                {% csrf_token %}
+                <input type="hidden" name="drink_id" value={{ drink.id }} />
+                <input type="submit" value="Order" />
+            </form>
+        </li>
+        <li style="display:inline">
+            <form name="order_drink" method="post" action="{% url 'order'%}">
+                {% csrf_token %}
+                <input type="hidden" name="drink_id" value={{ drink.id }} />
+                <input type="submit" value="Review" />
+            </form>
+        </li>
     </ul>
 {% endfor %}
 </form>

@@ -3,34 +3,33 @@ from django.contrib.auth.models import User
 from .models import Customer, Drink
 from django.contrib import auth
 import mysql.connector
+
+# # Global connection to be used by all views for prepared statement queries
+cnx = mysql.connector.connect(user='root', password="coffee",
+                              host='127.0.0.1', port=1234,
+                              database='coffeemanager')
+
+
+def preparedStatements(query):
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    return cursor
+
+
 # Create your views here.
 
 def dictfetchall(cursor):
     "Returns all rows from a cursor as a dict"
     desc = cursor.description
     return [
-            dict(zip([col[0] for col in desc], row))
-            for row in cursor.fetchall()
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
     ]
 
-def home(request):
-    return render(request, "coffeemanager/home.html")
 
-
+# --------------------------------------Admin/Staff Views-------------------------------------------------
 def staffHome(request):
     return render(request, "coffeemanager/staffHome.html")
-
-def orders(request):
-    cnx = mysql.connector.connect(user='root', password="coffee",
-                                  host='127.0.0.1', port=1234,
-                                  database='coffeemanager')
-    cursor = cnx.cursor()
-    query = "SELECT name, price from coffeemanager_drink;"
-    cursor.execute(query)
-    drinks = dictfetchall(cursor)
-    for drink in cursor:
-        print(drink)
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': drinks})
 
 
 def addDrink(request):
@@ -45,6 +44,50 @@ def addDrink(request):
             return redirect('staffHome')  # Maybe redirect it to the menu url
     else:
         return render(request, 'coffeemanager/menu/addDrink.html')
+
+
+# -------------------------------------------Customer Views----------------------------------------------------
+def home(request):
+    return render(request, "coffeemanager/home.html")
+
+
+def menu(request):
+    #cursor = cnx.cursor()
+    query = "SELECT id, name, price from coffeemanager_drink;"
+    cursor = preparedStatements(query)
+    drinks = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': drinks})
+
+
+def order(request):
+    customer_id = request.user.username
+    drink_id = request.POST.get('drink_id')
+
+    # transaction_level = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;"
+    # cursor.execute(transaction_level)
+    # cursor.close()
+
+    transaction_start = "START TRANSACTION;"
+    preparedStatements(transaction_start)
+    maxId = """
+            SELECT MAX(order_id)+1 FROM coffeemanager_orders
+            """
+    order_id = preparedStatements(maxId).fetchone()[0]
+    order_id += 1
+
+    insert = f''' 
+            INSERT INTO coffeemanager_orders(order_id,
+                                            customer_id,
+                                            drink_id,
+                                            order_status)
+            VALUES({order_id}, "{customer_id}", {drink_id}, FALSE);
+            '''
+    preparedStatements(insert)
+    commit = "COMMIT;"
+    preparedStatements(commit)
+    cnx.commit()
+    return redirect('menu')
 
 
 def signup(request):
@@ -77,7 +120,8 @@ def login(request):
                 return redirect('staffHome')
             return redirect('home')
         else:
-            return render(request, 'coffeemanager/registration/login.html', {'error': 'Username or password is incorrect!'})
+            return render(request, 'coffeemanager/registration/login.html',
+                          {'error': 'Username or password is incorrect!'})
     else:
         return render(request, 'coffeemanager/registration/login.html')
 
