@@ -49,7 +49,33 @@ def addDrink(request):
 
 
 def changeStatus(request):
-    return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': changeStatus})
+    query = """
+                    SELECT order_id, order_status 
+                    from coffeemanager_orders order by order_id desc;
+                    """
+    cursor = preparedStatements(query)
+    allStatus = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
+
+def changeStat(request):
+    if request.method == 'POST':
+        orderId = int(request.POST.get('order_id').replace("/",""))
+        new_status = 0
+        if 'Completed' in request.POST:
+            new_status = 1
+        elif 'In-Progress' in request.POST:
+            new_status = 0
+        elif 'Cancelled' in request.POST:
+            new_status = 2
+        query = f"""
+                    UPDATE coffeemanager_orders
+                    SET order_status = {new_status}
+                    WHERE order_id = {orderId};
+                       """
+        preparedStatements(query)
+        return redirect('staffHome')
+
 
 
 # -------------------------------------------Customer Views----------------------------------------------------
