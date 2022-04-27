@@ -48,6 +48,10 @@ def addDrink(request):
         return render(request, 'coffeemanager/menu/addDrink.html')
 
 
+def changeStatus(request):
+    return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': changeStatus})
+
+
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
     return render(request, "coffeemanager/home.html")
@@ -156,3 +160,4 @@ def status(request):
     status = dictfetchall(cursor)
     cursor.close()
     return render(request, "coffeemanager/menu/status.html", context={'status': status})
+
