@@ -12,6 +12,12 @@
 
 <h1>MENU</h1>
 
+<form name="drink_search" method="post" action="{% url 'menu'%}">
+    {% csrf_token %}
+    <input type="text" name="search_term" />
+    <input type="submit" value="Search" />
+</form>
+
 {% for drink in drinks %}
     <ul>
         <li style="display:inline">{{ drink.name }}</li>

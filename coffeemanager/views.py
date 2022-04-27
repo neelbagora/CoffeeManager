@@ -38,6 +38,7 @@ def addDrink(request):
             Drink.objects.get(name=request.POST['name'])
             return render(request, 'coffeemanager/menu/addDrink.html', {'error': 'Drink already in the menu!'})
         except Drink.DoesNotExist:
+            # ORM usage
             drink = Drink(name=request.POST['name'],
                           price=request.POST['price'])
             drink.save()
@@ -52,8 +53,20 @@ def home(request):
 
 
 def menu(request):
-    #cursor = cnx.cursor()
-    query = "SELECT id, name, price from coffeemanager_drink;"
+    if request.method == 'POST':
+        # Search Results
+        search_term = request.POST.get('search_term')
+        query = f"""
+                    SELECT id, name, price 
+                    FROM coffeemanager_drink
+                    WHERE name LIKE "%{search_term}%"
+                    """
+    else:
+        # View Full Menu
+        query = """
+                SELECT id, name, price 
+                from coffeemanager_drink;
+                """
     cursor = preparedStatements(query)
     drinks = dictfetchall(cursor)
     cursor.close()
@@ -74,7 +87,10 @@ def order(request):
             SELECT MAX(order_id)+1 FROM coffeemanager_orders
             """
     order_id = preparedStatements(maxId).fetchone()[0]
-    order_id += 1
+    if not order_id:
+        order_id = 0
+    else:
+        order_id += 1
 
     insert = f''' 
             INSERT INTO coffeemanager_orders(order_id,
@@ -100,6 +116,7 @@ def signup(request):
                 user = User.objects.create_user(
                     request.POST['username'], password=request.POST['password1'], first_name=request.POST['name'])
                 auth.login(request, user)
+                # ORM Usage
                 customer = Customer(
                     name=request.POST['name'], email=request.POST['username'])
                 customer.save()
