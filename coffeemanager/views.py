@@ -358,7 +358,7 @@ def myReviews(request):
     query = f'''SELECT review_id, name, review 
         FROM coffeemanager_review 
         JOIN coffeemanager_drink ON drink_id = id
-        WHERE customer_id = "{customer_id}";
+        WHERE customer_id = "{customer_id}" order by review_id desc;
      '''
     cursor = preparedStatements(query)
     reviews = dictfetchall(cursor)
