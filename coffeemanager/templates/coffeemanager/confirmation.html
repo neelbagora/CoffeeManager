@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+
+<h1>Confirmation</h1>
+<p>Thank you for your order! Your order number is: {{ confirmation }}</p>
+
+<div>
+  <a href="{% url 'home' %}">Home</a>
+</div>
+{% endblock %}

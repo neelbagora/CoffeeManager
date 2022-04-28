@@ -10,7 +10,7 @@
 <br/>
 {% endif %}
 
-<h1>MENU</h1>
+<h1>Menu</h1>
 
 <form name="drink_search" method="post" action="{% url 'menu'%}">
     {% csrf_token %}
@@ -30,6 +30,28 @@
             </form>
         </li>
         <li style="display:inline">
+            <form name="add_to_cart" method="post" action="{% url 'addCartItem'%}">
+                {% csrf_token %}
+                <input type="hidden" name="drink_id" value={{ drink.id }} />
+                {% if drink.added is None %}
+                    <input type="submit" value="Add To Cart" />
+                {% else %}
+                    <input type="button" value="Added To Cart" disabled/>
+                {% endif %}
+            </form>
+        </li>
+        <li style="display:inline">
+            <form name="remove_from_cart" method="post" action="{% url 'removeCartItemMenu'%}">
+                {% csrf_token %}
+                <input type="hidden" name="drink_id" value={{ drink.id }} />
+                {% if drink.added is None %}
+                    <input type="button" value="Remove From Cart" disabled/>
+                {% else %}
+                    <input type="submit" value="Remove From Cart" />
+                {% endif %}
+            </form>
+        </li>
+        <li style="display:inline">
             <form name="order_drink" method="post" action="{% url 'order'%}">
                 {% csrf_token %}
                 <input type="hidden" name="drink_id" value={{ drink.id }} />
@@ -38,7 +60,6 @@
         </li>
     </ul>
 {% endfor %}
-</form>
-
+<div> <a href="{% url 'viewCart' %}">Checkout</a></div>
 
 {% endblock %}

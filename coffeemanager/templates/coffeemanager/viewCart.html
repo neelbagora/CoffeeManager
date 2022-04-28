@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+
+<h1>Cart</h1>
+
+{% for drink in drinks %}
+    <ul>
+        <li style="display:inline">{{ drink.name }}</li>
+        <li style="display:inline">${{ drink.price }}</li>
+        <li style="display:inline">
+            <form name="remove_drink" method="post" action="{% url 'removeCartItem'%}">
+                {% csrf_token %}
+                <input type="hidden" name="drink_id" value={{ drink.id }} />
+                <input type="submit" value="Remove" />
+            </form>
+        </li>
+    </ul>
+{% endfor %}
+
+{% if drinks|length == 0 %}
+  <p> Your cart is empty!</p>
+{% endif %}
+
+<div>
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'menu' %}">Menu</a>
+  <a href="{% url 'submitOrder' %}">Checkout</a>
+</div>
+{% endblock %}
