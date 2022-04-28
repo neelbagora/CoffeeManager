@@ -12,5 +12,10 @@ urlpatterns = [
     path('menu', views.menu, name="menu"),
     path('order', views.order, name="order"),
     path('status', views.status, name="status"),
-    path('changeStatus', views.changeStatus, name="changeStatus")
+    path('changeStatus', views.changeStatus, name="changeStatus"),
+    path('viewCart', views.view_cart, name="viewCart"),
+    path('addCartItem', views.addCartItem, name="addCartItem"),
+    path('removeCartItemMenu', views.removeCartItemMenu, name="removeCartItemMenu"),
+    path('removeCartItem', views.removeCartItem, name="removeCartItem"),
+    path('submitOrder', views.submitOrder, name="submitOrder")
 ]
