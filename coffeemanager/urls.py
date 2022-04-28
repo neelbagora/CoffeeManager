@@ -21,5 +21,6 @@ urlpatterns = [
     path('changeStat', views.changeStat, name="changeStat"),
     path('addReview', views.addReview, name="addReview"),
     path('insertReview', views.insertReview, name="insertReview"),
-    path('myReviews', views.myReviews, name="myReviews")
+    path('myReviews', views.myReviews, name="myReviews"),
+    path('allReviews', views.allReviews, name="allReviews")
 ]

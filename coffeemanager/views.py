@@ -79,6 +79,16 @@ def changeStat(request):
         cnx.commit()
         return redirect('staffHome')
 
+def allReviews(request):
+    query = f'''SELECT review_id, coffeemanager_drink.name as drink, review, coffeemanager_customer.name as cust_name
+           FROM coffeemanager_review 
+           JOIN coffeemanager_drink ON drink_id = id JOIN coffeemanager_customer ON customer_id = email order by review_id desc;
+        '''
+    cursor = preparedStatements(query)
+    allReviews = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/registration/allReviews.html", context={'allReviews': allReviews})
+
 
 
 # -------------------------------------------Customer Views----------------------------------------------------
