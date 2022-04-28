@@ -1,12 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "cs348-coffeemanager",
-  "private_key_id": "4553e3b92e5d1bd4b1793233ca1b1ab14a49e600",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCkjnmHqwvh8Nj1\nBt9MFICpdIRIotS2HnU7M8/oBAWdxlzIToq7AsyhqcTv4P13dYqEc8ePmBCvja8L\nCpdBbOhI7qCz5BmBT9mXLOcZyeENwYn9dnUCKTuPeRAL+8UxOFzawC7I3Zpzu4jE\nBoUc1YVSM27vnY2BXnkBDHbStbXdGArVgw31VPwNyszSQTfGwpe2ZROuVqK3XO0O\nt1jwZJY9IpojJWGx517k26UYMpEPFao+Y3gv8S9+EO/NT2sAfKw4PZJJfuluKjXm\nI7/Aa4ktWx5tZYTssM2r1aMc8fdeETQNKwvZd7a+jMtAfpn4cP2TgAqJPAFFmnRJ\nNq2HvgglAgMBAAECggEAAXzaQ2w79MR5Kanwvd7XlPCdO4zhUG4xECJ1SDs1E8qV\nzyfKoEszr2h6A9MsZ3aUFIN5c+ZjjDrDMN3dJTXHWdVydX3j7yPaK0A4LKcDFl1A\nEp8OCsF1rOPizcDudPX1/PJM2fsK6O3ynBcVAAA8LtSRNbBedaN1g5lpv5jt9nw7\n78EtiI/uUOnlylEp1wYErFQequNwKAEDJAVIfN9IoNEaCCDlVK4kZi1rsFn8nTIz\n14anh9u9Vr0H87KO/ZrzK3GLAld+jnYRwHKzPke7glEzg92TvIi6nSRWfuuam5E8\niy3YkEb5dgWksFwt6IvrGWPccfQfgFcklZPeIMTPlwKBgQDeQ6pr9KvMNsSYtiNV\nEP+8xzJS2wtcDazVJwzYs3SFZavhqD51dCNdOGzf0H8qmQQiCARTbleWBuVId/ua\n80yEH5xBieps5d4dXYdGrc6RUwl3Lwp2vPVPvZQwwicqB9qHvCBlcdA/fvaAhIPa\nK85z5E0gVUcoTWJ+OQRS9fSGxwKBgQC9iIHg+w81F4anz6ko1xd0mb0EOW6vribZ\ndPwodhHEUoDwjKXqDE473VWNbP+szydVxx2pLe6hry3yoV3ij0QhA13u71JskKsP\nBUiRtYNZ6SJqE8HX6ffq3hLwn3Kl8dM/53LjtIu15lHvIm+5OIK3yEalJvcHACZH\naafJjUbdswKBgQDH1VilRU8tBVTO5Htx4R29ce859X0KH7Vz029GalpqEVZvRaAa\nY/fjuXaR6FhdSUQhAMo65OtUlRCSjmWmE/eIlw8bEc+2ZxnDlzKoBl7B5EGPabjj\nttJsBkv1ZqplrLf679bEvoZ4gENKm1oczuQI6Iu7dVDL2H+kcskDeeWHQwKBgDa4\nN48lzLEuVqESUitJVitCy5BxqGQuKmcz4C0qUVzV2QYaBTi6Tsf30eBf7L0OnbOl\nJgoXCcNCWUioj/t+E1RYrYDzNV/EsK5IfzgaKI8HwPjRNXDJytrTPLKdxjLky3Gy\nt7fIA2ID2fnpfkoCZ7L5rnO1+THbODH77gZBtIkDAoGAYu/9Lo4PjQ4LFXyfIRvq\nCqu883Ia09GiZI5hV+a4mBGDpqlgXzGGGgDmrgKyIq/u8UzUUD/VnRZ5s3mxp10v\nIvT4mTpdTYhuOc51TtqsewfMPOPRnqJt9dj9O7AAJSu3oZgOmac7nJ6HzWSPbFpg\ndjEEaPUfQW7GYLkCIjZq/HU=\n-----END PRIVATE KEY-----\n",
-  "client_email": "cs348-coffeemanager@appspot.gserviceaccount.com",
-  "client_id": "113646709918279031480",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cs348-coffeemanager%40appspot.gserviceaccount.com"
-}
+
