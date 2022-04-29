@@ -4,6 +4,7 @@ from .models import *
 from django.contrib import auth
 import mysql.connector
 import logging
+from django.contrib.auth.decorators import login_required
 
 # # Global connection to be used by all views for prepared statement queries
 cnx = mysql.connector.connect(user='root', password="coffee",
@@ -31,10 +32,11 @@ def dictfetchall(cursor):
 
 
 # --------------------------------------Admin/Staff Views-------------------------------------------------
+@login_required(login_url='/login')
 def staffHome(request):
     return render(request, "coffeemanager/staffHome.html")
 
-
+@login_required(login_url='/login')
 def addDrink(request):
     if request.method == "POST":
         try:
@@ -49,7 +51,7 @@ def addDrink(request):
     else:
         return render(request, 'coffeemanager/menu/addDrink.html')
 
-
+@login_required(login_url='/login')
 def changeOrderStatus(request):
     query = """
         SELECT order_id, order_status 
@@ -60,24 +62,27 @@ def changeOrderStatus(request):
     cursor.close()
     return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
 
+@login_required(login_url='/login')
 def changeStoreStatus(request):
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
 
+    store = "CoffeeShop"
     query = f'''
             SELECT open FROM coffeemanager_shop
-            WHERE name = "CoffeeShop";
+            WHERE name = "{store}";
         '''
     is_open = preparedStatements(query).fetchone()[0] == 1
 
     query = f'''
             UPDATE coffeemanager_shop 
             SET open = {not is_open}
-            WHERE name = "CoffeeShop";
+            WHERE name = "{store}";
         '''
     preparedStatements(query)
-    return render(request, "coffeemanager/staffHome.html", context={'status': not is_open})
+    return render(request, "coffeemanager/staffHome.html", context={'status': not is_open, "store": store})
 
+@login_required(login_url='/login')
 def changeStat(request):
     if request.method == 'POST':
         orderId = int(request.POST.get('order_id').replace("/",""))
@@ -111,13 +116,14 @@ def allReviews(request):
 
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
+    store = "CoffeeShop"
     query = f'''
-        SELECT open FROM coffeemanager_shop WHERE name = "CoffeeShop";
+        SELECT open FROM coffeemanager_shop WHERE name = "{store}";
         '''
     is_open = preparedStatements(query).fetchone()[0]
-    return render(request, "coffeemanager/home.html", {"status": is_open})
+    return render(request, "coffeemanager/home.html", {"status": is_open, "store" : store})
 
-
+@login_required(login_url='/login')
 def menu(request):
     if request.method == 'POST':
         # Search Results
@@ -138,6 +144,7 @@ def menu(request):
     cursor.close()
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
 
+@login_required(login_url='/login')
 def updateMenu(email):
     query = """
             SELECT drink.id, name, price, quantity 
@@ -150,6 +157,7 @@ def updateMenu(email):
     print(all_drinks)
     return all_drinks
 
+@login_required(login_url='/login')
 def addCartItem(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -206,6 +214,7 @@ def addCartItem(request):
     
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
 
+@login_required(login_url='/login')
 def removeCartItemMenu(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -249,6 +258,7 @@ def removeCartItemMenu(request):
 
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
 
+@login_required(login_url='/login')
 def removeCartItem(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -282,6 +292,7 @@ def removeCartItem(request):
 
     return render(request, "coffeemanager/viewCart.html", context={'drinks': drinks})
 
+@login_required(login_url='/login')
 def view_cart(request):
     email = request.user.username
     query = f'''
@@ -299,6 +310,7 @@ def view_cart(request):
     cursor.close()
     return render(request, "coffeemanager/viewCart.html", context={'drinks': drinks})
 
+@login_required(login_url='/login')
 def submitOrder(request):    
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
@@ -354,6 +366,7 @@ def submitOrder(request):
 
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
+@login_required(login_url='/login')
 def order(request):
     customer_id = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -373,6 +386,7 @@ def order(request):
 
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
+@login_required(login_url='/login')
 def signup(request):
     if request.method == "POST":
         if request.POST['password1'] == request.POST['password2']:
@@ -393,7 +407,6 @@ def signup(request):
     else:
         return render(request, 'coffeemanager/registration/signup.html')
 
-
 def login(request):
     if request.method == 'POST':
         user = auth.authenticate(
@@ -409,14 +422,14 @@ def login(request):
     else:
         return render(request, 'coffeemanager/registration/login.html')
 
-
 def logout(request):
     auth.logout(request)
     return redirect('home')
 
+@login_required(login_url='/login')
 def status(request):
     customer_id = request.user.username
-    query = f'''SELECT order_id, order_status from coffeemanager_orders where customer_id="{customer_id}";
+    query = f'''SELECT id, order_status from coffeemanager_orders where customer_id="{customer_id}";
     '''
     cursor = preparedStatements(query)
     status = dictfetchall(cursor)
