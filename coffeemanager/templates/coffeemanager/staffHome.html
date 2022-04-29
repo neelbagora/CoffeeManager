@@ -15,8 +15,12 @@
     <p> Admin site</p>
     <div>
       {% if user.is_authenticated %}
+
         <div>
-        <a href="{% url 'addDrink' %}">Add a Drink</a>
+          <a href="{% url 'changeStoreStatus' %}">Change Store Status</a>
+        </div>
+        <div>
+          <a href="{% url 'addDrink' %}">Add a Drink</a>
         </div>
          <div>
         <a href="">Order List</a>
@@ -25,8 +29,8 @@
         <a href="{% url 'logout' %}">Logout</a>
               </div>
         <div>
-        <a href="{% url 'changeStatus' %}">Change Order Status</a>
-              </div>
+          <a href="{% url 'changeOrderStatus' %}">Change Order Status</a>
+        </div>
       {% else %}
         <a href="{% url 'signup' %}">Sign Up</a>
         <a href="{% url 'login' %}">Login</a>
