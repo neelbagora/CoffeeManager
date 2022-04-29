@@ -14,12 +14,12 @@
     <div>
       {% if user.is_authenticated %}
         {% if status %}
-          <p> Welcome to CoffeeShop!</p>
+          <p> Welcome to {{ store }}!</p>
           <div>  <a href="{% url 'menu' %}">Menu</a></div>
           <div> <a href="{% url 'status' %}">Order Status</a></div>
           <div> <a href="{% url 'viewCart' %}">View Cart</a></div>
         {% else %}
-          <p> The CoffeeShop is closed.</p>
+          <p> The {{ store }} is closed.</p>
         {% endif %}
         <div> <a href="{% url 'logout' %}">Logout</a></div>
       {% else %}
