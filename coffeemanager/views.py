@@ -59,8 +59,22 @@ def changeOrderStatus(request):
     return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
 
 def changeStoreStatus(request):
+    transaction_start = "START TRANSACTION;"
+    preparedStatements(transaction_start)
 
-    return render(request, "coffeemanager/staffHome.html", context={'status': status})
+    query = f'''
+            SELECT open FROM coffeemanager_shop
+            WHERE name = "CoffeeShop";
+        '''
+    is_open = preparedStatements(query).fetchone()[0] == 1
+
+    query = f'''
+            UPDATE coffeemanager_shop 
+            SET open = {not is_open}
+            WHERE name = "CoffeeShop";
+        '''
+    preparedStatements(query)
+    return render(request, "coffeemanager/staffHome.html", context={'status': not is_open})
 
 def changeStat(request):
     if request.method == 'POST':
@@ -84,7 +98,11 @@ def changeStat(request):
 
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
-    return render(request, "coffeemanager/home.html")
+    query = f'''
+        SELECT open FROM coffeemanager_shop WHERE name = "CoffeeShop";
+        '''
+    is_open = preparedStatements(query).fetchone()[0]
+    return render(request, "coffeemanager/home.html", {"status": is_open})
 
 
 def menu(request):
