@@ -53,10 +53,10 @@
             </form>
         </li>
         <li style="display:inline">
-            <form name="order_drink" method="post" action="{% url 'order'%}">
-                {% csrf_token %}
-                <input type="hidden" name="drink_id" value={{ drink.id }} />
-                <input type="submit" value="Review" />
+             <form name="add-rev" method="post" action="{% url 'addReview'%}">
+                  {% csrf_token %}
+                 <input type="hidden" name="drink_id" value={{ drink.id }} />
+                    <input type="submit" value="Review" />
             </form>
         </li>
     </ul>

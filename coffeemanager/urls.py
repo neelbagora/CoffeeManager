@@ -19,5 +19,9 @@ urlpatterns = [
     path('removeCartItemMenu', views.removeCartItemMenu, name="removeCartItemMenu"),
     path('removeCartItem', views.removeCartItem, name="removeCartItem"),
     path('submitOrder', views.submitOrder, name="submitOrder"),
-    path('changeStat', views.changeStat, name="changeStat")
+    path('changeStat', views.changeStat, name="changeStat"),
+    path('addReview', views.addReview, name="addReview"),
+    path('insertReview', views.insertReview, name="insertReview"),
+    path('myReviews', views.myReviews, name="myReviews"),
+    path('allReviews', views.allReviews, name="allReviews")
 ]
