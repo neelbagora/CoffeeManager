@@ -11,16 +11,17 @@
 {% endif %}
 
 <h1>Hello, {{ user.first_name|default:'Guest' }}</h1>
-
-    <p> Welcome to the Our site</p>
     <div>
       {% if user.is_authenticated %}
-         <div> <a href="{% url 'logout' %}">Logout</a></div>
-         <div>  <a href="{% url 'menu' %}">Menu</a></div>
-         <div> <a href="{% url 'status' %}">Order Status</a></div>
-         <div> <a href="{% url 'viewCart' %}">View Cart</a></div>
-         <div> <a href="{% url 'myReviews' %}">My Reviews</a></div>
-    
+        {% if status %}
+          <p> Welcome to CoffeeShop!</p>
+          <div>  <a href="{% url 'menu' %}">Menu</a></div>
+          <div> <a href="{% url 'status' %}">Order Status</a></div>
+          <div> <a href="{% url 'viewCart' %}">View Cart</a></div>
+        {% else %}
+          <p> The CoffeeShop is closed.</p>
+        {% endif %}
+        <div> <a href="{% url 'logout' %}">Logout</a></div>
       {% else %}
           <a href="{% url 'signup' %}">Sign Up</a>
           <a href="{% url 'login' %}">Login</a>
