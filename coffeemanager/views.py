@@ -32,11 +32,9 @@ def dictfetchall(cursor):
 
 
 # --------------------------------------Admin/Staff Views-------------------------------------------------
-@login_required(login_url='/login')
 def staffHome(request):
     return render(request, "coffeemanager/staffHome.html")
 
-@login_required(login_url='/login')
 def addDrink(request):
     if request.method == "POST":
         try:
@@ -51,7 +49,6 @@ def addDrink(request):
     else:
         return render(request, 'coffeemanager/menu/addDrink.html')
 
-@login_required(login_url='/login')
 def changeOrderStatus(request):
     query = """
         SELECT order_id, order_status 
@@ -62,7 +59,6 @@ def changeOrderStatus(request):
     cursor.close()
     return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
 
-@login_required(login_url='/login')
 def changeStoreStatus(request):
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
@@ -82,7 +78,6 @@ def changeStoreStatus(request):
     preparedStatements(query)
     return render(request, "coffeemanager/staffHome.html", context={'status': not is_open, "store": store})
 
-@login_required(login_url='/login')
 def changeStat(request):
     if request.method == 'POST':
         orderId = int(request.POST.get('order_id').replace("/",""))
@@ -112,52 +107,35 @@ def allReviews(request):
     cursor.close()
     return render(request, "coffeemanager/registration/allReviews.html", context={'allReviews': allReviews})
 
-
-
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
     store = "CoffeeShop"
     query = f'''
         SELECT open FROM coffeemanager_shop WHERE name = "{store}";
         '''
-    is_open = preparedStatements(query).fetchone()[0]
+    is_open = preparedStatements(query).fetchone()[0] == 1
     return render(request, "coffeemanager/home.html", {"status": is_open, "store" : store})
 
-@login_required(login_url='/login')
 def menu(request):
+    search_term = None
     if request.method == 'POST':
         # Search Results
         search_term = request.POST.get('search_term')
-        query = f"""
-                SELECT id, name, price 
-                FROM coffeemanager_drink
-                WHERE name LIKE "%{search_term}%";
-                """
-    else:
-        # View Full Menu
-        query = """
-                SELECT id, name, price 
-                from coffeemanager_drink;
-                """
-    cursor = preparedStatements(query)
-    drinks = dictfetchall(cursor)
-    cursor.close()
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, search_term)})
 
-@login_required(login_url='/login')
-def updateMenu(email):
+def updateMenu(email, search_term = None):
     query = """
             SELECT drink.id, name, price, quantity 
             from coffeemanager_drink AS drink
-            LEFT JOIN coffeemanager_cart_item ON drink.id = product_id;
+            LEFT JOIN coffeemanager_cart_item ON drink.id = product_id
             """
+    if search_term:
+        query = query + f''' WHERE name LIKE "%{search_term}%";'''
     cursor = preparedStatements(query)
     all_drinks = dictfetchall(cursor)
     cursor.close()
-    print(all_drinks)
     return all_drinks
 
-@login_required(login_url='/login')
 def addCartItem(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -176,7 +154,9 @@ def addCartItem(request):
         # ORM Usage
         cart = Cart(customer_email = email)
         cart.save()
-        
+        commit = "COMMIT;"
+        preparedStatements(commit)
+
         # Get cart_id
         query = f'''
             SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
@@ -200,6 +180,8 @@ def addCartItem(request):
         # ORM Usage
         cart_item = Cart_Item(product_id = drink_id, cart_id = cart_id, quantity = 1)
         cart_item.save()
+        commit = "COMMIT;"
+        preparedStatements(commit)
     else:
         # If not null, increment the quantity of existing cart_item
         update = f''' 
@@ -214,7 +196,6 @@ def addCartItem(request):
     
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
 
-@login_required(login_url='/login')
 def removeCartItemMenu(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -258,7 +239,6 @@ def removeCartItemMenu(request):
 
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
 
-@login_required(login_url='/login')
 def removeCartItem(request):
     email = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -272,18 +252,31 @@ def removeCartItem(request):
         '''
     cart_id = preparedStatements(query).fetchone()[0]
 
-    delete = f''' 
-            DELETE FROM coffeemanager_cart_item
-            WHERE cart_id = {cart_id} AND product_id = {drink_id};
-            '''
-    preparedStatements(delete)
+    query = f'''
+        SELECT quantity FROM coffeemanager_cart_item
+        WHERE cart_id = {cart_id} AND product_id = {drink_id}; 
+        '''
+    quantity = preparedStatements(query).fetchone()[0]
+
+    if quantity > 1:
+        query = f''' 
+                UPDATE coffeemanager_cart_item
+                SET quantity = {quantity - 1}
+                WHERE cart_id = {cart_id} AND product_id = {drink_id};
+                '''
+    else:
+        query = f''' 
+                DELETE FROM coffeemanager_cart_item
+                WHERE cart_id = {cart_id} AND product_id = {drink_id};
+                '''
+    preparedStatements(query)
     commit = "COMMIT;"
     preparedStatements(commit)
     cnx.commit()
 
     # Get all the cart items in the cart
     query = f'''
-        SELECT tab1.id, name, price FROM coffeemanager_drink AS tab1
+        SELECT tab1.id, name, price, quantity FROM coffeemanager_drink AS tab1
         INNER JOIN coffeemanager_cart_item ON product_id = tab1.id; 
         '''
     cursor = preparedStatements(query)
@@ -292,25 +285,26 @@ def removeCartItem(request):
 
     return render(request, "coffeemanager/viewCart.html", context={'drinks': drinks})
 
-@login_required(login_url='/login')
 def view_cart(request):
     email = request.user.username
     query = f'''
         SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
         '''
-    cart_id = preparedStatements(query).fetchone()[0]
+    cart_id = preparedStatements(query).fetchone()
 
-    query = f'''
-        SELECT tab1.id, name, price FROM coffeemanager_drink AS tab1
-        INNER JOIN coffeemanager_cart_item ON tab1.id = product_id
-        WHERE cart_id = {cart_id}; 
-        '''
-    cursor = preparedStatements(query)
-    drinks = dictfetchall(cursor)
-    cursor.close()
+    drinks = []
+    if cart_id:
+        cart_id = cart_id[0]
+        query = f'''
+            SELECT tab1.id, name, price, quantity FROM coffeemanager_drink AS tab1
+            INNER JOIN coffeemanager_cart_item ON tab1.id = product_id
+            WHERE cart_id = {cart_id}; 
+            '''
+        cursor = preparedStatements(query)
+        drinks = dictfetchall(cursor)
+        cursor.close()
     return render(request, "coffeemanager/viewCart.html", context={'drinks': drinks})
 
-@login_required(login_url='/login')
 def submitOrder(request):    
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
@@ -319,6 +313,8 @@ def submitOrder(request):
     # ORM Usage
     order = Orders(customer_id = request.user.username, order_status=False)
     order.save()
+    commit = "COMMIT;"
+    preparedStatements(commit)
 
     maxId = """
             SELECT MAX(id) FROM coffeemanager_orders
@@ -344,6 +340,8 @@ def submitOrder(request):
         # ORM Usage
         order_item = Order_Item(drink_id = item['product_id'], order_id = order_id, quantity = item['quantity'])
         order_item.save()
+        commit = "COMMIT;"
+        preparedStatements(commit)
 
         delete = f''' 
             DELETE FROM coffeemanager_cart_item
@@ -366,7 +364,6 @@ def submitOrder(request):
 
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
-@login_required(login_url='/login')
 def order(request):
     customer_id = request.user.username
     drink_id = request.POST.get('drink_id')
@@ -377,16 +374,18 @@ def order(request):
     # ORM Usage
     order = Orders(customer_id=request.user.username, order_status=False)
     order.save()
+    commit = "COMMIT;"
+    preparedStatements(commit)
     maxId = """
-            SELECT MAX(order_id) FROM coffeemanager_orders
+            SELECT MAX(id) FROM coffeemanager_orders
             """
     order_id = preparedStatements(maxId).fetchone()[0]
     order_item = Order_Item(drink_id = drink_id, order_id = order_id, quantity = 1)
     order_item.save()
-
+    commit = "COMMIT;"
+    preparedStatements(commit)
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
-@login_required(login_url='/login')
 def signup(request):
     if request.method == "POST":
         if request.POST['password1'] == request.POST['password2']:
@@ -423,10 +422,35 @@ def login(request):
         return render(request, 'coffeemanager/registration/login.html')
 
 def logout(request):
+    cart_id = f'''
+            SELECT id FROM coffeemanager_cart
+            WHERE customer_email = "{request.user.username}";
+            '''
+    cart_id = preparedStatements(cart_id).fetchone()
+
+    if cart_id:
+        cart_id = cart_id[0]
+        delete = f''' 
+                    DELETE FROM coffeemanager_cart_item
+                    WHERE cart_id = {cart_id};
+                    '''
+        preparedStatements(delete)
+        commit = "COMMIT;"
+        preparedStatements(commit)
+        cnx.commit()
+
+        delete = f'''
+                    DELETE FROM coffeemanager_cart
+                    WHERE id = {cart_id}; 
+                '''
+        preparedStatements(delete)
+        commit = "COMMIT;"
+        preparedStatements(commit)
+        cnx.commit()
+
     auth.logout(request)
     return redirect('home')
 
-@login_required(login_url='/login')
 def status(request):
     customer_id = request.user.username
     query = f'''SELECT id, order_status from coffeemanager_orders where customer_id="{customer_id}";
