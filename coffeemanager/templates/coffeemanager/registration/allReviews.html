@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+
+<h1>ALL Reviews</h1>
+
+{% for s in allReviews %}
+    <ul>
+        <div style="display: compact">
+            <div>
+      Drink Name :{{s.drink}}
+                </div>
+             <div>
+            Review : {{s.review}}
+            </div>
+             <div>
+            Customer Name : {{s.cust_name}}
+            </div>
+        </div>
+    </ul>
+{% endfor %}
+<input class ="btn btn-primary" onclick="location.href='{% url 'home' %}'" type="button" value= "back" />
+</form>
+
+
+{% endblock %}

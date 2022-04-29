@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 cnx = mysql.connector.connect(user='root', password="coffee",
                               host='127.0.0.1', port=1234,
                               database='coffeemanager')
+global main_id
+
 
 
 def preparedStatements(query):
@@ -97,7 +99,18 @@ def changeStat(request):
                     WHERE order_id = {orderId};
                        """
         preparedStatements(query)
+        cnx.commit()
         return redirect('staffHome')
+
+def allReviews(request):
+    query = f'''SELECT review_id, coffeemanager_drink.name as drink, review, coffeemanager_customer.name as cust_name
+           FROM coffeemanager_review 
+           JOIN coffeemanager_drink ON drink_id = id JOIN coffeemanager_customer ON customer_id = email order by review_id desc;
+        '''
+    cursor = preparedStatements(query)
+    allReviews = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/registration/allReviews.html", context={'allReviews': allReviews})
 
 
 
@@ -423,3 +436,38 @@ def status(request):
     cursor.close()
     return render(request, "coffeemanager/menu/status.html", context={'status': status})
 
+def addReview(request):
+    email = request.user.username
+    global main_id
+    main_id = request.POST.get('drink_id')
+    return render(request, "coffeemanager/menu/addReview.html")
+
+def insertReview(request):
+    email = request.user.username
+    review = request.POST.get('reviewText')
+    global main_id
+    maxId = """
+                SELECT MAX(review_id) FROM coffeemanager_review;
+                """
+    review_id = preparedStatements(maxId).fetchone()[0]
+    if not review_id:
+        review_id = 1
+    else:
+        review_id += 1
+    query = f'''insert into coffeemanager_review VALUES ({review_id}, "{email}", {main_id} ,"{review}");
+    '''
+    preparedStatements(query)
+    cnx.commit()
+    return redirect('menu')
+
+def myReviews(request):
+    customer_id = request.user.username
+    query = f'''SELECT review_id, name, review 
+        FROM coffeemanager_review 
+        JOIN coffeemanager_drink ON drink_id = id
+        WHERE customer_id = "{customer_id}" order by review_id desc;
+     '''
+    cursor = preparedStatements(query)
+    reviews = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/menu/myReviews.html", context={'reviews': reviews} )
