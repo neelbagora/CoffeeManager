@@ -299,7 +299,6 @@ def submitOrder(request):
 
     # Insert every item from the cart into the order item table
     for item in cart_items:
-        print(item)
         insert = f''' 
             INSERT INTO coffeemanager_order_item(id,
                                             drink_id,
