@@ -23,5 +23,5 @@ urlpatterns = [
     path('addReview', views.addReview, name="addReview"),
     path('insertReview', views.insertReview, name="insertReview"),
     path('myReviews', views.myReviews, name="myReviews"),
-    path('allReviews', views.allReviews, name="allReviews")
+    path('allReviews', views.allReviews, name="allReviews"),
 ]
