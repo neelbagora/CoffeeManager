@@ -22,6 +22,11 @@
     <ul>
         <li style="display:inline">{{ drink.name }}</li>
         <li style="display:inline">${{ drink.price}}</li>
+        {% if drink.quantity is None %}
+            <li style="display:inline">Quantity: 0</li>
+        {% else %}
+            <li style="display:inline">Quantity: {{ drink.quantity}}</li>
+        {% endif %}
         <li style="display:inline">
             <form name="order_drink" method="post" action="{% url 'order'%}">
                 {% csrf_token %}
@@ -33,18 +38,14 @@
             <form name="add_to_cart" method="post" action="{% url 'addCartItem'%}">
                 {% csrf_token %}
                 <input type="hidden" name="drink_id" value={{ drink.id }} />
-                {% if drink.added is None %}
-                    <input type="submit" value="Add To Cart" />
-                {% else %}
-                    <input type="button" value="Added To Cart" disabled/>
-                {% endif %}
+                <input type="submit" value="Add To Cart" />
             </form>
         </li>
         <li style="display:inline">
             <form name="remove_from_cart" method="post" action="{% url 'removeCartItemMenu'%}">
                 {% csrf_token %}
                 <input type="hidden" name="drink_id" value={{ drink.id }} />
-                {% if drink.added is None %}
+                {% if drink.quantity is None %}
                     <input type="button" value="Remove From Cart" disabled/>
                 {% else %}
                     <input type="submit" value="Remove From Cart" />

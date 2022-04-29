@@ -16,6 +16,7 @@
     <ul>
         <li style="display:inline">{{ drink.name }}</li>
         <li style="display:inline">${{ drink.price }}</li>
+        <li style="display:inline">Quantity: {{ drink.quantity}}</li>
         <li style="display:inline">
             <form name="remove_drink" method="post" action="{% url 'removeCartItem'%}">
                 {% csrf_token %}
@@ -28,11 +29,12 @@
 
 {% if drinks|length == 0 %}
   <p> Your cart is empty!</p>
+{% else %}
+  <a href="{% url 'submitOrder' %}">Checkout</a>
 {% endif %}
 
 <div>
   <a href="{% url 'home' %}">Home</a>
   <a href="{% url 'menu' %}">Menu</a>
-  <a href="{% url 'submitOrder' %}">Checkout</a>
 </div>
 {% endblock %}
