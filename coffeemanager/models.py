@@ -18,6 +18,15 @@ class Drink(models.Model):
     def __str__(self):
         return "Name: "+self.name+" Price: "+self.price
 
+class Order(models.Model):
+    order_id = models.DecimalField(max_digits=8, decimal_places=4)
+    customer_id = models.DecimalField(max_digits=8, decimal_places=4)
+    order_status = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return "Order ID: "+self.order_id+" Customer ID: "+self.customer_id+" Order Status: "+self.order_status
+    
+
 class OrderItem(models.Model):
     product_id = models.DecimalField(max_digits=8, decimal_places=4)
     quantity = models.DecimalField(max_digits=4, decimal_places=0)
