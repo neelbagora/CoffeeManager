@@ -51,8 +51,8 @@ def addDrink(request):
 
 def changeOrderStatus(request):
     query = """
-        SELECT order_id, order_status 
-        from coffeemanager_orders order by order_id desc;
+        SELECT id, order_status 
+        from coffeemanager_orders order by id desc;
         """
     cursor = preparedStatements(query)
     allStatus = dictfetchall(cursor)
@@ -91,7 +91,7 @@ def changeStat(request):
         query = f"""
                     UPDATE coffeemanager_orders
                     SET order_status = {new_status}
-                    WHERE order_id = {orderId};
+                    WHERE id = {orderId};
                        """
         preparedStatements(query)
         cnx.commit()
@@ -468,7 +468,7 @@ def addReview(request):
 
 def insertReview(request):
     email = request.user.username
-    review = request.POST.get('reviewText')
+    review = request.POST.get('temp')
     global main_id
     maxId = """
                 SELECT MAX(review_id) FROM coffeemanager_review;

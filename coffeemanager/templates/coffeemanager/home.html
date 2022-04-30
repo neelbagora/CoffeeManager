@@ -18,6 +18,7 @@
           <div>  <a href="{% url 'menu' %}">Menu</a></div>
           <div> <a href="{% url 'status' %}">Order Status</a></div>
           <div> <a href="{% url 'viewCart' %}">View Cart</a></div>
+          <div> <a href="{% url 'myReviews' %}">My Reviews</a></div>
         {% else %}
           <p> The {{ store }} is closed.</p>
         {% endif %}
