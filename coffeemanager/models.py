@@ -17,6 +17,19 @@ class Drink(models.Model):
 
     def __str__(self):
         return "Name: "+self.name+" Price: "+self.price
+    
+class Shop(models.Model):
+    shop_id = models.DecimalField(max_digits=8, decimal_places=4)
+    shop_name = models.CharField(max_length=45)
+    address = models.CharField(max_length=2048)
+    phone_num = models.CharField(max_length=45)
+    opening_time = models.CharField(max_length=8)
+    closing_time = models.CharField(max_length=8)
+    
+    def __str__(self):
+        return "Shop ID: "+self.shop_id+" Shop Name: "+self.shop_name+" Address: "+
+                    self.address+" Phone Number: "+self.phone_num+" Opening Time: "+self.opening_time+
+                    " Closing Time: "+self.closing_time
 
 class Order(models.Model):
     order_id = models.DecimalField(max_digits=8, decimal_places=4)
@@ -24,7 +37,8 @@ class Order(models.Model):
     order_status = models.BooleanField(default=False)
     
     def __str__(self):
-        return "Order ID: "+self.order_id+" Customer ID: "+self.customer_id+" Order Status: "+self.order_status
+        return "Order ID: "+self.order_id+" Customer ID: "+self.customer_id+" Order Status: "
+                +self.order_status
     
 
 class OrderItem(models.Model):
