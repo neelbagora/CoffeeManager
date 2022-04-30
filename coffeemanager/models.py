@@ -50,4 +50,11 @@ class Cart(models.Model):
     def __str__(self):
         return "Card ID: "+self.cart_id+" Customer Email: "+self.customer_email
     
+class CartEntry(models.Model):
+    cart_id = models.DecimalField(max_digits=8, decimal_places=4)
+    product_id = models.DecimalField(max_digits=8, decimal_places=4)
+    quantity = models.DecimalField(max_digits=4, decimal_places=0)
+    
+    def __str__(self):
+        return "Cart ID: "+self.cart_id+" Product ID: "+self.product_id+" Quantity: "+self.quantity
     
