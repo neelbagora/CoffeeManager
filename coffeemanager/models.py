@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here. These will replicate the table schema in the datatbase
+# This file contains the models which replicate the table schema in the datatbase
 
 
 class Customer(models.Model):
