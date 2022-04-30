@@ -43,4 +43,11 @@ class Review(models.Model):
     def __str__(self):
         return "Review ID: "+self.review_id+" Number of Stars: "+self.numStars+" Comment: "+self.comment
     
+class Cart(models.Model):
+    cart_id = models.DecimalField(max_digits=8, decimal_places=4)
+    customer_email = models.CharField(max_length=45, primary_key=True)
+    
+    def __str__(self):
+        return "Card ID: "+self.cart_id+" Customer Email: "+self.customer_email
+    
     
