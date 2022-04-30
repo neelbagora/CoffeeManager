@@ -2,7 +2,6 @@ from django.db import models
 
 # This file contains the models which replicate the table schema in the datatbase
 
-
 class Customer(models.Model):
     order_id = models.DecimalField(max_digits=8, decimal_places=4)
     name = models.CharField(max_length=45)
@@ -18,7 +17,7 @@ class Drink(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=4)
 
     def __str__(self):
-        return "Drink ID: "+self.drink_id+" Name: "+self.name+" Price: "+self.price
+      return "Drink ID: "+self.drink_id+" Name: "+self.name+" Price: "+self.price
     
     
 class Shop(models.Model):

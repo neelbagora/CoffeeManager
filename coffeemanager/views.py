@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from .models import Customer, Drink
+from .models import *
 from django.contrib import auth
 import mysql.connector
 import logging
+from django.contrib.auth.decorators import login_required
 
 # # Global connection to be used by all views for prepared statement queries
 cnx = mysql.connector.connect(user='root', password="coffee",
@@ -34,7 +35,6 @@ def dictfetchall(cursor):
 def staffHome(request):
     return render(request, "coffeemanager/staffHome.html")
 
-
 def addDrink(request):
     if request.method == "POST":
         try:
@@ -49,16 +49,34 @@ def addDrink(request):
     else:
         return render(request, 'coffeemanager/menu/addDrink.html')
 
-
-def changeStatus(request):
+def changeOrderStatus(request):
     query = """
-                    SELECT order_id, order_status 
-                    from coffeemanager_orders order by order_id desc;
-                    """
+        SELECT id, order_status 
+        from coffeemanager_orders order by id desc;
+        """
     cursor = preparedStatements(query)
     allStatus = dictfetchall(cursor)
     cursor.close()
     return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
+
+def changeStoreStatus(request):
+    transaction_start = "START TRANSACTION;"
+    preparedStatements(transaction_start)
+
+    store = "CoffeeShop"
+    query = f'''
+            SELECT open FROM coffeemanager_shop
+            WHERE name = "{store}";
+        '''
+    is_open = preparedStatements(query).fetchone()[0] == 1
+
+    query = f'''
+            UPDATE coffeemanager_shop 
+            SET open = {not is_open}
+            WHERE name = "{store}";
+        '''
+    preparedStatements(query)
+    return render(request, "coffeemanager/staffHome.html", context={'status': not is_open, "store": store})
 
 def changeStat(request):
     if request.method == 'POST':
@@ -73,7 +91,7 @@ def changeStat(request):
         query = f"""
                     UPDATE coffeemanager_orders
                     SET order_status = {new_status}
-                    WHERE order_id = {orderId};
+                    WHERE id = {orderId};
                        """
         preparedStatements(query)
         cnx.commit()
@@ -89,43 +107,33 @@ def allReviews(request):
     cursor.close()
     return render(request, "coffeemanager/registration/allReviews.html", context={'allReviews': allReviews})
 
-
-
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
-    return render(request, "coffeemanager/home.html")
-
+    store = "CoffeeShop"
+    query = f'''
+        SELECT open FROM coffeemanager_shop WHERE name = "{store}";
+        '''
+    is_open = preparedStatements(query).fetchone()[0] == 1
+    return render(request, "coffeemanager/home.html", {"status": is_open, "store" : store})
 
 def menu(request):
+    search_term = None
     if request.method == 'POST':
         # Search Results
         search_term = request.POST.get('search_term')
-        query = f"""
-                    SELECT id, name, price 
-                    FROM coffeemanager_drink
-                    WHERE name LIKE "%{search_term}%"
-                    """
-    else:
-        # View Full Menu
-        query = """
-                SELECT id, name, price 
-                from coffeemanager_drink;
-                """
-    cursor = preparedStatements(query)
-    drinks = dictfetchall(cursor)
-    cursor.close()
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, search_term)})
 
-def updateMenu(email):
+def updateMenu(email, search_term = None):
     query = """
             SELECT drink.id, name, price, quantity 
             from coffeemanager_drink AS drink
-            LEFT JOIN coffeemanager_cart_item ON drink.id = product_id;
+            LEFT JOIN coffeemanager_cart_item ON drink.id = product_id
             """
+    if search_term:
+        query = query + f''' WHERE name LIKE "%{search_term}%";'''
     cursor = preparedStatements(query)
     all_drinks = dictfetchall(cursor)
     cursor.close()
-
     return all_drinks
 
 def addCartItem(request):
@@ -135,43 +143,47 @@ def addCartItem(request):
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
 
+    # Get cart_id associated with email.
     query = f'''
         SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
         '''
     cart_id = preparedStatements(query).fetchone()
     
+    # If no cart_id, create a new cart
     if not cart_id:
-        insert = f''' 
-            INSERT INTO coffeemanager_cart(id, customer_email)
-            VALUES(NULL, "{email}");
-            '''
-        preparedStatements(insert)
+        # ORM Usage
+        cart = Cart(customer_email = email)
+        cart.save()
         commit = "COMMIT;"
-        
+        preparedStatements(commit)
+
+        # Get cart_id
         query = f'''
             SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
             '''
         cart_id = preparedStatements(query).fetchone()[0]
     else:
+        # Cart_id found, get result
         cart_id = cart_id[0]
 
+    # Get all the items from the cart matching the cart_id and product_id
     query = f'''
         SELECT id, cart_id, product_id, quantity FROM coffeemanager_cart_item
         WHERE cart_id = {cart_id} AND product_id = {drink_id};
         '''
     cursor = preparedStatements(query).fetchone()
     
+    # Check if null result is returned.
     if not cursor:
-        insert = f''' 
-                INSERT INTO coffeemanager_cart_item(id, cart_id,
-                                                product_id, quantity)
-                VALUES(NULL, {cart_id}, {drink_id}, 1);
-                '''
-        preparedStatements(insert)
+        transaction_start = "START TRANSACTION;"
+        preparedStatements(transaction_start)
+        # ORM Usage
+        cart_item = Cart_Item(product_id = drink_id, cart_id = cart_id, quantity = 1)
+        cart_item.save()
         commit = "COMMIT;"
         preparedStatements(commit)
-        cnx.commit()
     else:
+        # If not null, increment the quantity of existing cart_item
         update = f''' 
                 UPDATE coffeemanager_cart_item
                 SET quantity = {cursor[3] + 1}
@@ -191,17 +203,20 @@ def removeCartItemMenu(request):
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
 
+    # Get cart id matching the email
     query = f'''
         SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
         '''
     cart_id = preparedStatements(query).fetchone()[0]
 
+    # Find the quantity of the product in cart_item that is associated with cart_id
     query = f'''
         SELECT quantity FROM coffeemanager_cart_item WHERE cart_id = {cart_id} AND product_id = {drink_id};
         '''
     quantity = preparedStatements(query).fetchone()[0]
 
     if quantity > 1:
+        # Decrement if > 1
         update = f''' 
                 UPDATE coffeemanager_cart_item
                 SET quantity = {quantity - 1}
@@ -212,6 +227,7 @@ def removeCartItemMenu(request):
         preparedStatements(commit)
         cnx.commit()
     else:
+        # Delete if = 1
         delete = f''' 
                 DELETE FROM coffeemanager_cart_item
                 WHERE cart_id = {cart_id} AND product_id = {drink_id};
@@ -236,18 +252,31 @@ def removeCartItem(request):
         '''
     cart_id = preparedStatements(query).fetchone()[0]
 
-    delete = f''' 
-            DELETE FROM coffeemanager_cart_item
-            WHERE cart_id = {cart_id} AND product_id = {drink_id};
-            '''
-    preparedStatements(delete)
+    query = f'''
+        SELECT quantity FROM coffeemanager_cart_item
+        WHERE cart_id = {cart_id} AND product_id = {drink_id}; 
+        '''
+    quantity = preparedStatements(query).fetchone()[0]
+
+    if quantity > 1:
+        query = f''' 
+                UPDATE coffeemanager_cart_item
+                SET quantity = {quantity - 1}
+                WHERE cart_id = {cart_id} AND product_id = {drink_id};
+                '''
+    else:
+        query = f''' 
+                DELETE FROM coffeemanager_cart_item
+                WHERE cart_id = {cart_id} AND product_id = {drink_id};
+                '''
+    preparedStatements(query)
     commit = "COMMIT;"
     preparedStatements(commit)
     cnx.commit()
 
     # Get all the cart items in the cart
     query = f'''
-        SELECT tab1.id, name, price FROM coffeemanager_drink AS tab1
+        SELECT tab1.id, name, price, quantity FROM coffeemanager_drink AS tab1
         INNER JOIN coffeemanager_cart_item ON product_id = tab1.id; 
         '''
     cursor = preparedStatements(query)
@@ -261,41 +290,37 @@ def view_cart(request):
     query = f'''
         SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
         '''
-    cart_id = preparedStatements(query).fetchone()[0]
+    cart_id = preparedStatements(query).fetchone()
 
-    query = f'''
-        SELECT tab1.id, name, price FROM coffeemanager_drink AS tab1
-        INNER JOIN coffeemanager_cart_item ON tab1.id = product_id
-        WHERE cart_id = {cart_id}; 
-        '''
-    cursor = preparedStatements(query)
-    drinks = dictfetchall(cursor)
-    cursor.close()
+    drinks = []
+    if cart_id:
+        cart_id = cart_id[0]
+        query = f'''
+            SELECT tab1.id, name, price, quantity FROM coffeemanager_drink AS tab1
+            INNER JOIN coffeemanager_cart_item ON tab1.id = product_id
+            WHERE cart_id = {cart_id}; 
+            '''
+        cursor = preparedStatements(query)
+        drinks = dictfetchall(cursor)
+        cursor.close()
     return render(request, "coffeemanager/viewCart.html", context={'drinks': drinks})
 
-def submitOrder(request):
-    # Calculate the next order_id
-    maxId = """
-            SELECT MAX(order_id) FROM coffeemanager_orders
-            """
-    order_id = preparedStatements(maxId).fetchone()[0]
-    if not order_id:
-        order_id = 0
-    else:
-        order_id += 1
-    
+def submitOrder(request):    
+    transaction_start = "START TRANSACTION;"
+    preparedStatements(transaction_start)
+
     # Create a new order object in db
-    insert = f''' 
-            INSERT INTO coffeemanager_orders(order_id,
-                                            customer_id,
-                                            order_status)
-            VALUES({order_id}, "{request.user.username}", FALSE);
-            '''
-    preparedStatements(insert)
+    # ORM Usage
+    order = Orders(customer_id = request.user.username, order_status=False)
+    order.save()
     commit = "COMMIT;"
     preparedStatements(commit)
-    cnx.commit()
 
+    maxId = """
+            SELECT MAX(id) FROM coffeemanager_orders
+            """
+    order_id = preparedStatements(maxId).fetchone()[0]
+    
     # Fetch the current cart_id in the customer's account
     query = f'''
                 SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
@@ -312,17 +337,11 @@ def submitOrder(request):
 
     # Insert every item from the cart into the order item table
     for item in cart_items:
-        insert = f''' 
-            INSERT INTO coffeemanager_order_item(id,
-                                            drink_id,
-                                            order_id,
-                                            quantity)
-            VALUES(NULL, {item['product_id']}, {order_id}, {item['quantity']});
-            '''
-        preparedStatements(insert)
+        # ORM Usage
+        order_item = Order_Item(drink_id = item['product_id'], order_id = order_id, quantity = item['quantity'])
+        order_item.save()
         commit = "COMMIT;"
         preparedStatements(commit)
-        cnx.commit()
 
         delete = f''' 
             DELETE FROM coffeemanager_cart_item
@@ -349,44 +368,22 @@ def order(request):
     customer_id = request.user.username
     drink_id = request.POST.get('drink_id')
 
-    # transaction_level = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;"
-    # cursor.execute(transaction_level)
-    # cursor.close()
-
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
+
+    # ORM Usage
+    order = Orders(customer_id=request.user.username, order_status=False)
+    order.save()
+    commit = "COMMIT;"
+    preparedStatements(commit)
     maxId = """
-            SELECT MAX(order_id) FROM coffeemanager_orders
+            SELECT MAX(id) FROM coffeemanager_orders
             """
     order_id = preparedStatements(maxId).fetchone()[0]
-    if not order_id:
-        order_id = 0
-    else:
-        order_id += 1
-
-    insert = f''' 
-            INSERT INTO coffeemanager_orders(order_id,
-                                            customer_id,
-                                            order_status)
-            VALUES({order_id}, "{customer_id}", FALSE);
-            '''
-    preparedStatements(insert)
+    order_item = Order_Item(drink_id = drink_id, order_id = order_id, quantity = 1)
+    order_item.save()
     commit = "COMMIT;"
     preparedStatements(commit)
-    cnx.commit()
-
-    insert = f''' 
-            INSERT INTO coffeemanager_order_item(id,
-                                            drink_id,
-                                            order_id,
-                                            quantity)
-            VALUES(NULL, {drink_id}, {order_id}, 1);
-            '''
-    preparedStatements(insert)
-    commit = "COMMIT;"
-    preparedStatements(commit)
-    cnx.commit()
-
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
 def signup(request):
@@ -409,7 +406,6 @@ def signup(request):
     else:
         return render(request, 'coffeemanager/registration/signup.html')
 
-
 def login(request):
     if request.method == 'POST':
         user = auth.authenticate(
@@ -425,14 +421,39 @@ def login(request):
     else:
         return render(request, 'coffeemanager/registration/login.html')
 
-
 def logout(request):
+    cart_id = f'''
+            SELECT id FROM coffeemanager_cart
+            WHERE customer_email = "{request.user.username}";
+            '''
+    cart_id = preparedStatements(cart_id).fetchone()
+
+    if cart_id:
+        cart_id = cart_id[0]
+        delete = f''' 
+                    DELETE FROM coffeemanager_cart_item
+                    WHERE cart_id = {cart_id};
+                    '''
+        preparedStatements(delete)
+        commit = "COMMIT;"
+        preparedStatements(commit)
+        cnx.commit()
+
+        delete = f'''
+                    DELETE FROM coffeemanager_cart
+                    WHERE id = {cart_id}; 
+                '''
+        preparedStatements(delete)
+        commit = "COMMIT;"
+        preparedStatements(commit)
+        cnx.commit()
+
     auth.logout(request)
     return redirect('home')
 
 def status(request):
     customer_id = request.user.username
-    query = f'''SELECT order_id, order_status from coffeemanager_orders where customer_id="{customer_id}";
+    query = f'''SELECT id, order_status from coffeemanager_orders where customer_id="{customer_id}";
     '''
     cursor = preparedStatements(query)
     status = dictfetchall(cursor)
@@ -447,7 +468,7 @@ def addReview(request):
 
 def insertReview(request):
     email = request.user.username
-    review = request.POST.get('reviewText')
+    review = request.POST.get('temp')
     global main_id
     maxId = """
                 SELECT MAX(review_id) FROM coffeemanager_review;

@@ -12,7 +12,8 @@ urlpatterns = [
     path('menu', views.menu, name="menu"),
     path('order', views.order, name="order"),
     path('status', views.status, name="status"),
-    path('changeStatus', views.changeStatus, name="changeStatus"),
+    path('changeOrderStatus', views.changeOrderStatus, name="changeOrderStatus"),
+    path('changeStoreStatus', views.changeStoreStatus, name="changeStoreStatus"),
     path('viewCart', views.view_cart, name="viewCart"),
     path('addCartItem', views.addCartItem, name="addCartItem"),
     path('removeCartItemMenu', views.removeCartItemMenu, name="removeCartItemMenu"),
@@ -22,5 +23,5 @@ urlpatterns = [
     path('addReview', views.addReview, name="addReview"),
     path('insertReview', views.insertReview, name="insertReview"),
     path('myReviews', views.myReviews, name="myReviews"),
-    path('allReviews', views.allReviews, name="allReviews")
+    path('allReviews', views.allReviews, name="allReviews"),
 ]

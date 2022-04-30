@@ -15,8 +15,16 @@
     <p> Admin site</p>
     <div>
       {% if user.is_authenticated %}
+        {% if status %}
+          <p> The {{ store }} is currently <a style="display:inline;color: green">open</a> </p>
+        {% else %}
+          <p> The {{ store }} is currently <a style="display:inline;color: red">closed</a>  </p>
+        {% endif %}
         <div>
-        <a href="{% url 'addDrink' %}">Add a Drink</a>
+          <a href="{% url 'changeStoreStatus' %}">Toggle Store Status</a>
+        </div>
+        <div>
+          <a href="{% url 'addDrink' %}">Add a Drink</a>
         </div>
          <div>
         <a href="">Order List</a>
@@ -25,9 +33,8 @@
         <a href="{% url 'logout' %}">Logout</a>
               </div>
         <div>
-        <a href="{% url 'changeStatus' %}">Change Order Status</a>
-              </div>
-        <div>
+          <a href="{% url 'changeOrderStatus' %}">Change Order Status</a>
+        </div>
         <a href="{% url 'allReviews' %}">View All Customer Reviews</a>
               </div>
       {% else %}
