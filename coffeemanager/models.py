@@ -34,3 +34,13 @@ class OrderItem(models.Model):
     
     def __str__(self):
         return "Product ID: "+self.product_id+" Quantity: "+self.quantity+" Order ID: "+self.order_id
+    
+class Review(models.Model):
+    review_id = models.DecimalField(max_digits=8, decimal_places=4)
+    numStars = models.DecimalField(max_digits=2, decimal_places=0)
+    comment = models.CharField(max_length=2048)
+    
+    def __str__(self):
+        return "Review ID: "+self.review_id+" Number of Stars: "+self.numStars+" Comment: "+self.comment
+    
+    
