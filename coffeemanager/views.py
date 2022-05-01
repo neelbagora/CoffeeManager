@@ -168,8 +168,7 @@ def addCartItem(request):
         # ORM Usage
         cart = Cart(customer_email = email)
         cart.save()
-        commit = "COMMIT;"
-        preparedStatements(commit)
+        cnx.commit()
 
         # Get cart_id
         query = f'''
@@ -194,8 +193,7 @@ def addCartItem(request):
         # ORM Usage
         cart_item = Cart_Item(product_id = drink_id, cart_id = cart_id, quantity = 1)
         cart_item.save()
-        commit = "COMMIT;"
-        preparedStatements(commit)
+        cnx.commit()
     else:
         # If not null, increment the quantity of existing cart_item
         update = f''' 
@@ -204,8 +202,7 @@ def addCartItem(request):
                 WHERE cart_id = {cart_id} AND product_id = {drink_id};
                 '''
         preparedStatements(update)
-        commit = "COMMIT;"
-        preparedStatements(commit)
+        cnx.commit()
         cnx.commit()
     
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
@@ -237,8 +234,6 @@ def removeCartItemMenu(request):
                 WHERE cart_id = {cart_id} AND product_id = {drink_id};
                 '''
         preparedStatements(update)
-        commit = "COMMIT;"
-        preparedStatements(commit)
         cnx.commit()
     else:
         # Delete if = 1
@@ -247,8 +242,6 @@ def removeCartItemMenu(request):
                 WHERE cart_id = {cart_id} AND product_id = {drink_id};
                 '''
         preparedStatements(delete)
-        commit = "COMMIT;"
-        preparedStatements(commit)
         cnx.commit()
 
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
@@ -284,8 +277,6 @@ def removeCartItem(request):
                 WHERE cart_id = {cart_id} AND product_id = {drink_id};
                 '''
     preparedStatements(query)
-    commit = "COMMIT;"
-    preparedStatements(commit)
     cnx.commit()
 
     # Get all the cart items in the cart
@@ -327,8 +318,7 @@ def submitOrder(request):
     # ORM Usage
     order = Orders(customer_id = request.user.username, order_status=False)
     order.save()
-    commit = "COMMIT;"
-    preparedStatements(commit)
+    cnx.commit()
 
     maxId = """
             SELECT MAX(id) FROM coffeemanager_orders
@@ -354,16 +344,13 @@ def submitOrder(request):
         # ORM Usage
         order_item = Order_Item(drink_id = item['product_id'], order_id = order_id, quantity = item['quantity'])
         order_item.save()
-        commit = "COMMIT;"
-        preparedStatements(commit)
+        cnx.commit()
 
         delete = f''' 
             DELETE FROM coffeemanager_cart_item
             WHERE id = {item['id']};
             '''
         preparedStatements(delete)
-        commit = "COMMIT;"
-        preparedStatements(commit)
         cnx.commit()
     
     # Delete cart object from database
@@ -372,8 +359,6 @@ def submitOrder(request):
             WHERE customer_email = "{request.user.username}";
             '''
     preparedStatements(delete)
-    commit = "COMMIT;"
-    preparedStatements(commit)
     cnx.commit()
 
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
@@ -388,16 +373,14 @@ def order(request):
     # ORM Usage
     order = Orders(customer_id=request.user.username, order_status=False)
     order.save()
-    commit = "COMMIT;"
-    preparedStatements(commit)
+    cnx.commit()
     maxId = """
             SELECT MAX(id) FROM coffeemanager_orders
             """
     order_id = preparedStatements(maxId).fetchone()[0]
     order_item = Order_Item(drink_id = drink_id, order_id = order_id, quantity = 1)
     order_item.save()
-    commit = "COMMIT;"
-    preparedStatements(commit)
+    cnx.commit()
     return render(request, "coffeemanager/confirmation.html", context={'confirmation': order_id})
 
 def signup(request):
@@ -483,12 +466,16 @@ def insertReview(request):
     email = request.user.username
     review = request.POST.get('reviewText')
     drink_id = request.POST.get('drink_id')
-    query = f'''
-            insert into coffeemanager_review(review_id, customer_id, drink_id, review)
-            VALUES (NULL, "{email}", {drink_id}, "{review}");
-            '''
-    preparedStatements(query)
+    review = Review(customer_id=email,
+                  drink_id=drink_id, review=review)
+    review.save()
     cnx.commit()
+    # query = f'''
+    #         insert into coffeemanager_review(review_id, customer_id, drink_id, review)
+    #         VALUES (NULL, "{email}", {drink_id}, "{review}");
+    #         '''
+    # preparedStatements(query)
+    # cnx.commit()
     return redirect('menu')
 
 def myReviews(request):
