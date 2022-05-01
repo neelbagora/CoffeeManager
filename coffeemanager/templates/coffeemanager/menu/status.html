@@ -25,6 +25,14 @@
             {% if s.order_status == 2 %}
         <li style="display:inline;color: red" >CANCELED</li>
         {% endif %}
+         <li style="display:inline">
+            <form name="view_order" method="post" action="{% url 'viewOrder'%}">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value={{ s.id }} />
+                <input type="submit" value="View Order" />
+            </form>
+        </li>
+
         </div>
     </ul>
 {% endfor %}
