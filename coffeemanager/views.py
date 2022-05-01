@@ -111,7 +111,6 @@ def allReviews(request):
 def prevOrders(request):
   query = f'''SELECT id, order_id, customer_id 
           FROM coffeemanager_orders 
-          JOIN cofeemanager_cart ON customer_id = email 
           WHERE order_status = True
           ORDER BY order_id desc;
        '''
