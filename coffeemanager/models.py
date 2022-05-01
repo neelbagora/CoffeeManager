@@ -21,7 +21,7 @@ class Drink(models.Model):
 
 class Review(models.Model):
     customer_id = models.CharField(max_length=45)
-    drink_id = models.IntegerField(max_length=10)
+    drink_id = models.IntegerField()
     review = models.CharField(max_length=2048)
 
     def __str__(self):
