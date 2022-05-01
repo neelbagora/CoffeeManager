@@ -97,6 +97,19 @@ def changeStat(request):
         cnx.commit()
         return redirect('staffHome')
 
+def viewOrder(request):
+    orderId = request.POST.get('order_id')
+    query = f'''
+        SELECT order_id, name, quantity
+        FROM coffeemanager_order_item
+        INNER JOIN coffeemanager_drink AS drinks ON drink_id = drinks.id
+        WHERE order_id = {orderId};
+        '''
+    cursor = preparedStatements(query) 
+    drinks = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/viewOrder.html", context={'order_id': orderId, 'orders': drinks})
+
 def allReviews(request):
     query = f'''SELECT review_id, coffeemanager_drink.name as drink, review, coffeemanager_customer.name as cust_name
            FROM coffeemanager_review 
