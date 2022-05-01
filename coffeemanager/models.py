@@ -18,12 +18,23 @@ class Drink(models.Model):
         return "Name: "+self.name+" Price: "+self.price
     
 class Review(models.Model):
-    review_id = models.DecimalField(max_digits=8, decimal_places=4)
     numStars = models.DecimalField(max_digits=2, decimal_places=0)
     comment = models.CharField(max_length=2048)
 
     def __str__(self):
         return "Review ID: " + self.review_id + " Number of Stars: " + numStars + " Comment: " + comment
+
+class Shop(models.Model):
+    shop_name = models.CharField(max_length=45)
+    address = models.CharField(max_length=2048)
+    phone_num = models.CharField(max_length=45)
+    opening_time = models.CharField(max_length=8)
+    closing_time = models.CharField(max_length=8)
+    
+    def __str__(self):
+        return "Shop Name: "+self.shop_name+" Address: "+
+                    self.address+" Phone Number: "+self.phone_num+" Opening Time: "+self.opening_time+
+                    " Closing Time: "+self.closing_time
 
 class Cart(models.Model):
     customer_email = models.CharField(max_length = 45)
