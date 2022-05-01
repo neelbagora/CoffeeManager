@@ -135,11 +135,9 @@ def menu(request):
     if request.method == 'POST':
         # Search Results
         search_term = request.POST.get('search_term')
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, search_term)})
-
-def updateMenu(email, search_term = None):
+    
     query = f'''
-        SELECT id FROM coffeemanager_cart WHERE customer_email = "{email}";
+        SELECT id FROM coffeemanager_cart WHERE customer_email = "{request.user.username}";
         '''
     cart_id = preparedStatements(query).fetchone()
     if not cart_id:
@@ -149,7 +147,9 @@ def updateMenu(email, search_term = None):
         cart_id = preparedStatements(query).fetchone()[0]
     else:
         cart_id = cart_id[0]
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, cart_id, search_term)})
 
+def updateMenu(email, cart_id, search_term = None):
     query = f'''
             SELECT drink.id, name, price, cart_item.quantity 
             from coffeemanager_drink AS drink
@@ -222,7 +222,7 @@ def addCartItem(request):
         cnx.commit()
         cnx.commit()
     
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, cart_id)})
 
 def removeCartItemMenu(request):
     email = request.user.username
@@ -261,7 +261,7 @@ def removeCartItemMenu(request):
         preparedStatements(delete)
         cnx.commit()
 
-    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username)})
+    return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, cart_id)})
 
 def removeCartItem(request):
     email = request.user.username
