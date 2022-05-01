@@ -138,13 +138,26 @@ def menu(request):
     return render(request, "coffeemanager/menu/menu.html", context={'drinks': updateMenu(request.user.username, search_term)})
 
 def updateMenu(email, search_term = None):
-    query = """
-            SELECT drink.id, name, price, quantity 
+    query = f'''
+        SELECT id FROM coffeemanager_cart WHERE customer_email = "{email}";
+        '''
+    cart_id = preparedStatements(query).fetchone()
+    subquery = 'SELECT quantity, product_id FROM coffeemanager_cart_item'
+    if cart_id:
+        cart_id = cart_id[0]
+        subquery = subquery + f' WHERE cart_id = {cart_id}'
+    query = f'''
+            SELECT drink.id, name, price, cart_item.quantity 
             from coffeemanager_drink AS drink
-            LEFT JOIN coffeemanager_cart_item ON drink.id = product_id
-            """
+            LEFT JOIN (
+                {subquery}
+            ) AS cart_item ON drink.id = cart_item.product_id
+            '''
+
     if search_term:
-        query = query + f''' WHERE name LIKE "%{search_term}%";'''
+        query = query + f'''WHERE name LIKE "%{search_term}%"'''
+
+    query = query + ';'
     cursor = preparedStatements(query)
     all_drinks = dictfetchall(cursor)
     cursor.close()
