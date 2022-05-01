@@ -10,12 +10,12 @@
 <br/>
 {% endif %}
 
-<h1>Drinks in Order</h1>
+<h1>Drinks in Order #{{ order_id }}</h1>
 
 {% for order in orders %}
     <ul>
-        <li style="display:inline">Order #: {{ order.order_id }}</li>
-        <li style="display:inline">Drink ID: {{ order.drink_id }}</li>
+        <li style="display:inline">Drink Name: {{ order.name }}</li>
+        <br>
         <li style="display:inline">Quantity: {{ order.quantity}}</li>
     </ul>
 {% endfor %}
