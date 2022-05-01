@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+
+<h1>Drinks in Order</h1>
+
+{% for order in orders %}
+    <ul>
+        <li style="display:inline">Order #: {{ order.order_id }}</li>
+        <li style="display:inline">Drink ID: {{ order.drink_id }}</li>
+        <li style="display:inline">Quantity: {{ order.quantity}}</li>
+    </ul>
+{% endfor %}
+
+
+<div>
+  <a href="{% url 'home' %}">Home</a>
+  <a href="{% url 'menu' %}">Menu</a>
+</div>
+{% endblock %}
+
