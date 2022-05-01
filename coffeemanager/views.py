@@ -509,3 +509,19 @@ def myReviews(request):
     reviews = dictfetchall(cursor)
     cursor.close()
     return render(request, "coffeemanager/menu/myReviews.html", context={'reviews': reviews} )
+  
+def myPrevOrders(request):
+    customer_id = request.user.username
+    query = f'''SELECT id FROM coffeemanager_orders 
+          WHERE order_status = TRUE AND customer_id = "{customer_id}" 
+          ORDER BY id desc;
+      '''
+    cursor = preparedStatements(query)
+    prev_orders = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/menu/myPrevOrders.html", context={'prevOrders': prev_orders})
+  
+
+
+
+
