@@ -106,6 +106,21 @@ def allReviews(request):
     allReviews = dictfetchall(cursor)
     cursor.close()
     return render(request, "coffeemanager/registration/allReviews.html", context={'allReviews': allReviews})
+  
+  
+def prevOrders(request):
+  query = f'''SELECT id, order_id, customer_id 
+          FROM coffeemanager_orders 
+          JOIN cofeemanager_cart ON customer_id = email 
+          WHERE order_status = True
+          ORDER BY order_id desc;
+       '''
+  
+  cursor = preparedStatements(query)
+  prevOrders = dictfetchall(cursor)
+  cursor.close()
+  return render(request, "coffemanager/menu/previousOrders.html", context={'prevOrders': prevOrders})
+          
 
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
