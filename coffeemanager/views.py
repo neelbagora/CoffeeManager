@@ -142,15 +142,19 @@ def updateMenu(email, search_term = None):
         SELECT id FROM coffeemanager_cart WHERE customer_email = "{email}";
         '''
     cart_id = preparedStatements(query).fetchone()
-    subquery = 'SELECT quantity, product_id FROM coffeemanager_cart_item'
-    if cart_id:
+    if not cart_id:
+        cart = Cart(customer_email = email)
+        cart.save()
+        cnx.commit()
+        cart_id = preparedStatements(query).fetchone()[0]
+    else:
         cart_id = cart_id[0]
-        subquery = subquery + f' WHERE cart_id = {cart_id}'
+
     query = f'''
             SELECT drink.id, name, price, cart_item.quantity 
             from coffeemanager_drink AS drink
             LEFT JOIN (
-                {subquery}
+                SELECT quantity, product_id FROM coffeemanager_cart_item WHERE cart_id = {cart_id}
             ) AS cart_item ON drink.id = cart_item.product_id
             '''
 
