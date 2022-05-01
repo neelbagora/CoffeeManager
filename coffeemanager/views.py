@@ -141,6 +141,7 @@ def menu(request):
         '''
     cart_id = preparedStatements(query).fetchone()
     if not cart_id:
+        email = request.user.username
         cart = Cart(customer_email = email)
         cart.save()
         cnx.commit()

@@ -52,7 +52,7 @@ class Cart_Item(models.Model):
     quantity = models.IntegerField()
 
     def __str__(self):
-        return "Cart ID: " + cart_id + " Product ID: " + product_id + " Quantity: " + quantity
+        return "Cart ID: " + self.cart_id + " Product ID: " + self.product_id + " Quantity: " + self.quantity
 
 
 class Orders(models.Model):
@@ -60,7 +60,7 @@ class Orders(models.Model):
     order_status = models.BooleanField()
 
     def __str__(self):
-        return "Customer ID: " + self.customer_email + " Fulfilled: " + status
+        return "Customer ID: " + self.customer_email + " Fulfilled: " + self.status
 
 
 class Order_Item(models.Model):
@@ -69,4 +69,4 @@ class Order_Item(models.Model):
     quantity = models.IntegerField()
 
     def __str__(self):
-        return "Order ID: " + order_id + " Drink ID: " + drink_id + " Quantity: " + quantity
+        return "Order ID: " + self.order_id + " Drink ID: " + self.drink_id + " Quantity: " + self.quantity
