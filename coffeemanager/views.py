@@ -502,6 +502,24 @@ def myReviews(request):
     reviews = dictfetchall(cursor)
     cursor.close()
     return render(request, "coffeemanager/menu/myReviews.html", context={'reviews': reviews} )
+
+def getReviewDrinks(request):
+    drink_id = request.POST.get('drink_id')
+    query = f'''SELECT review_id, review, email 
+            FROM coffeemanager_review 
+            JOIN coffeemanager_drink ON drink_id = id
+            JOIN coffeemanager_customer ON customer_id = email
+            WHERE drink_id = "{drink_id}" order by review_id desc;
+         '''
+    cursor = preparedStatements(query)
+    reviews = dictfetchall(cursor)
+    query = f'''SELECT name from coffeemanager_drink
+               WHERE id = "{drink_id}";
+            '''
+    cursor = preparedStatements(query)
+    drink_name = cursor.fetchone()[0]
+    cursor.close()
+    return render(request, "coffeemanager/menu/drinkReviews.html", context={'reviews': reviews, 'drink_name':drink_name})
   
 def myPrevOrders(request):
     customer_id = request.user.username

@@ -59,6 +59,13 @@
                     <input type="submit" value="Review" />
             </form>
         </li>
+        <li style="display:inline">
+             <form name="get-rev" method="post" action="{% url 'getReviewDrinks'%}">
+                  {% csrf_token %}
+                 <input type="hidden" name="drink_id" value={{ drink.id }} />
+                    <input type="submit" value="See Reviews" />
+            </form>
+        </li>
     </ul>
 {% endfor %}
 <div> <a href="{% url 'viewCart' %}">Checkout</a></div>

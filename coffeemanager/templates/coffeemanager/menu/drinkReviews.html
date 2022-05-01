@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if error %}
+{{ error }}
+
+<br/>
+<br/>
+{% endif %}
+<h1>ALL Reviews for {{drink_name}} </h1>
+
+{% for s in reviews %}
+    <ul>
+        <div style="display: compact">
+            <div>
+      Customer Username :{{s.email}}
+                </div>
+             <div>
+            Review : {{s.review}}
+            </div>
+
+        </div>
+    </ul>
+{% endfor %}
+<input class ="btn btn-primary" onclick="location.href='{% url 'menu' %}'" type="button" value= "back" />
+</form>
+
+{% endblock %}
