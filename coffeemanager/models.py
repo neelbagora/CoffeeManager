@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here. These will replicate the table schema in the datatbase
+# Contains Database ORM Models. These will replicate the table schema in the datatbase
 
 class Customer(models.Model):
     name = models.CharField(max_length=45)
@@ -32,9 +32,7 @@ class Shop(models.Model):
     closing_time = models.CharField(max_length=8)
     
     def __str__(self):
-        return "Shop Name: "+self.shop_name+" Address: "+
-                    self.address+" Phone Number: "+self.phone_num+" Opening Time: "+self.opening_time+
-                    " Closing Time: "+self.closing_time
+        return "Shop Name: " + self.shop_name + " Address: " + self.address + " Phone Number: " + self.phone_num + " Opening Time: " + self.opening_time + " Closing Time: " + self.closing_time
 
 class Cart(models.Model):
     customer_email = models.CharField(max_length = 45)
