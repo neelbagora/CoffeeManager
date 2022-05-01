@@ -11,13 +11,14 @@
 {% endif %}
 
 <h1>Review Your Drink</h1>
-<form name="temp"  method="post" action="" id="temp">
+<form name="temp" method="post" action="insertReview" id="temp">
+    {% csrf_token %}
     <input type="hidden" name="drink_id" value={{ drink_id }} />
     Review<br>
     <textarea form="temp" rows="5" cols="40" name="reviewText"></textarea>
 </form>
+<input class ="btn btn-primary" type="submit" form="temp" value= "submit" />
 <input class ="btn btn-primary" onclick="location.href='{% url 'home' %}'" type="button" value= "back" />
-<input class ="btn btn-primary" onclick="location.href='{% url 'insertReview' %}'" type="button" value= "submit" />
 </form>
 
 

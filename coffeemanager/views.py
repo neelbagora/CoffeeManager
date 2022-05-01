@@ -476,24 +476,17 @@ def status(request):
 
 def addReview(request):
     email = request.user.username
-    global main_id
-    main_id = request.POST.get('drink_id')
-    return render(request, "coffeemanager/menu/addReview.html")
+    drink_id = request.POST.get('drink_id')
+    return render(request, "coffeemanager/menu/addReview.html", context={'drink_id': drink_id})
 
 def insertReview(request):
     email = request.user.username
-    review = request.POST.get('temp')
-    global main_id
-    maxId = """
-                SELECT MAX(review_id) FROM coffeemanager_review;
-                """
-    review_id = preparedStatements(maxId).fetchone()[0]
-    if not review_id:
-        review_id = 1
-    else:
-        review_id += 1
-    query = f'''insert into coffeemanager_review VALUES ({review_id}, "{email}", {main_id} ,"{review}");
-    '''
+    review = request.POST.get('reviewText')
+    drink_id = request.POST.get('drink_id')
+    query = f'''
+            insert into coffeemanager_review(review_id, customer_id, drink_id, review)
+            VALUES (NULL, "{email}", {drink_id}, "{review}");
+            '''
     preparedStatements(query)
     cnx.commit()
     return redirect('menu')
