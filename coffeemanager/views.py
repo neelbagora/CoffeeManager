@@ -33,7 +33,13 @@ def dictfetchall(cursor):
 
 # --------------------------------------Admin/Staff Views-------------------------------------------------
 def staffHome(request):
-    return render(request, "coffeemanager/staffHome.html")
+    store = "CoffeeShop"
+    query = f'''
+            SELECT open FROM coffeemanager_shop
+            WHERE name = "{store}";
+        '''
+    is_open = preparedStatements(query).fetchone()[0] == 1
+    return render(request, "coffeemanager/staffHome.html", context={'status': is_open, "store": store})
 
 def addDrink(request):
     if request.method == "POST":
@@ -57,29 +63,30 @@ def changeOrderStatus(request):
     cursor = preparedStatements(query)
     allStatus = dictfetchall(cursor)
     cursor.close()
+
     return render(request, "coffeemanager/changeStatus.html", context={'changeStatus': allStatus})
 
 def changeStoreStatus(request):
     transaction_start = "START TRANSACTION;"
     preparedStatements(transaction_start)
-
     store = "CoffeeShop"
     query = f'''
             SELECT open FROM coffeemanager_shop
             WHERE name = "{store}";
         '''
     is_open = preparedStatements(query).fetchone()[0] == 1
-
     query = f'''
             UPDATE coffeemanager_shop 
             SET open = {not is_open}
             WHERE name = "{store}";
         '''
     preparedStatements(query)
-    return render(request, "coffeemanager/staffHome.html", context={'status': not is_open, "store": store})
+    cnx.commit()
+    return redirect('staffHome')
 
 def changeStat(request):
     if request.method == 'POST':
+        print(request.POST)
         orderId = int(request.POST.get('order_id').replace("/",""))
         new_status = 0
         if 'Completed' in request.POST:
@@ -88,14 +95,27 @@ def changeStat(request):
             new_status = 0
         elif 'Cancelled' in request.POST:
             new_status = 2
-        query = f"""
+        query = f'''
                     UPDATE coffeemanager_orders
                     SET order_status = {new_status}
                     WHERE id = {orderId};
-                       """
+                '''
         preparedStatements(query)
         cnx.commit()
         return redirect('staffHome')
+
+def viewOrder(request):
+    orderId = request.POST.get('order_id')
+    query = f'''
+        SELECT order_id, name, quantity
+        FROM coffeemanager_order_item
+        INNER JOIN coffeemanager_drink AS drinks ON drink_id = drinks.id
+        WHERE order_id = {orderId};
+        '''
+    cursor = preparedStatements(query) 
+    drinks = dictfetchall(cursor)
+    cursor.close()
+    return render(request, "coffeemanager/viewOrder.html", context={'order_id': orderId, 'orders': drinks})
 
 def allReviews(request):
     query = f'''SELECT review_id, coffeemanager_drink.name as drink, review, coffeemanager_customer.name as cust_name
@@ -141,7 +161,7 @@ def menu(request):
         '''
     cart_id = preparedStatements(query).fetchone()
     if not cart_id:
-        cart = Cart(customer_email = email)
+        cart = Cart(customer_email = request.user.username)
         cart.save()
         cnx.commit()
         cart_id = preparedStatements(query).fetchone()[0]
@@ -425,6 +445,12 @@ def login(request):
         user = auth.authenticate(
             username=request.POST['username'], password=request.POST['password'])
         if user is not None:
+            store = "CoffeeShop"
+            query = f'''
+                    SELECT open FROM coffeemanager_shop
+                    WHERE name = "{store}";
+                '''
+            is_open = preparedStatements(query).fetchone()[0]
             auth.login(request, user)
             if user.is_staff:
                 return redirect('staffHome')
