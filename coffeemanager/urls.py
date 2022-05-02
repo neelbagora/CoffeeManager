@@ -26,5 +26,4 @@ urlpatterns = [
     path('allReviews', views.allReviews, name="allReviews"),
     path('getReviewDrinks', views.getReviewDrinks, name="getReviewDrinks"),
     path('viewOrder', views.viewOrder, name="viewOrder"),
-    
 ]
