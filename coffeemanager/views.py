@@ -143,6 +143,8 @@ def prevOrders(request):
 
 # -------------------------------------------Customer Views----------------------------------------------------
 def home(request):
+    if request.user.is_superuser:
+        return redirect('staffHome')
     store = "CoffeeShop"
     query = f'''
         SELECT open FROM coffeemanager_shop WHERE name = "{store}";
