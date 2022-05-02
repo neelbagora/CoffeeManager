@@ -33,14 +33,14 @@ def dictfetchall(cursor):
 
 # --------------------------------------Admin/Staff Views-------------------------------------------------
 def staffHome(request):
-    email = request.user.username
-    query = f'''
-            SELECT is_staff
-            FROM auth_user
-            WHERE username = "{email}";
-        '''
-    is_staff = preparedStatements(query).fetchone()[0] == 1
-    if is_staff:
+    # email = request.user.username
+    # query = f'''
+    #         SELECT is_staff
+    #         FROM auth_user
+    #         WHERE username = "{email}";
+    #     '''
+    # is_staff = preparedStatements(query).fetchone()[0] == 1
+    if request.user.is_staff == 1:
         store = "CoffeeShop"
         query = f'''
                 SELECT open FROM coffeemanager_shop
