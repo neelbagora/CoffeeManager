@@ -27,7 +27,7 @@
         {% if s.order_status == 2 %}
         <li style="display:inline;color: red">CANCELED</li>
         {% endif %}
-
+        {% if s.order_status != 1%}
         <form name="changeStat" method="post" action="{% url 'changeStat'%}">
             {% csrf_token %}
             &nbsp&nbsp Change Status to:
@@ -35,7 +35,7 @@
              <input type="submit" id={{ s.id }} name = "Completed" value="Completed" style="color: green"/>
             <input type="submit"  name = "Cancelled" value="Cancelled" style="color: red"/>
             <input type="submit" name = "In-Progress" value="In-Progress" style="color: cadetblue" />
-
+        {% endif %}
 <!--            <select name="opt" id="status_opt">-->
 <!--                <option disabled selected value> &#45;&#45; select an option &#45;&#45;</option>-->
 <!--                <option value="1">Completed</option>-->
