@@ -16,7 +16,7 @@
     <ul>
         <li style="display:inline">{{ drink.name }}</li>
         <li style="display:inline">${{ drink.price }}</li>
-        <li style="display:inline">Quantity: {{ drink.quantity}}</li>
+        <li style="display:inline">Quantity: {{ drink.quantity }}</li>
         <li style="display:inline">
             <form name="remove_drink" method="post" action="{% url 'removeCartItem'%}">
                 {% csrf_token %}
