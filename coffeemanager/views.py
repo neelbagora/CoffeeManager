@@ -33,14 +33,22 @@ def dictfetchall(cursor):
 
 # --------------------------------------Admin/Staff Views-------------------------------------------------
 def staffHome(request):
-    store = "CoffeeShop"
+    email = request.user.username
     query = f'''
-            SELECT open FROM coffeemanager_shop
-            WHERE name = "{store}";
+            SELECT is_staff
+            FROM auth_user
+            WHERE username = "{email}";
         '''
-    is_open = preparedStatements(query).fetchone()[0] == 1
-    return render(request, "coffeemanager/staffHome.html", context={'status': is_open, "store": store})
-
+    is_staff = preparedStatements(query).fetchone()[0] == 1
+    if is_staff:
+        store = "CoffeeShop"
+        query = f'''
+                SELECT open FROM coffeemanager_shop
+                WHERE name = "{store}";
+            '''
+        is_open = preparedStatements(query).fetchone()[0] == 1
+        return render(request, "coffeemanager/staffHome.html", context={'status': is_open, "store": store})
+    return redirect('home')
 def addDrink(request):
     if request.method == "POST":
         try:
@@ -86,7 +94,7 @@ def changeStoreStatus(request):
 
 def changeStat(request):
     if request.method == 'POST':
-        print(request.POST)
+        #print(request.POST)
         orderId = int(request.POST.get('order_id').replace("/",""))
         new_status = 0
         if 'Completed' in request.POST:
